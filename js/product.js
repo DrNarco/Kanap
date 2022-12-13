@@ -1,6 +1,9 @@
 const search = window.location.search;
 const urlParams = new URLSearchParams(search)
 const id = urlParams.get("id")
+if (id != null) {
+    let productPrice = 0
+}
 
 fetch(`http://localhost:3000/api/products/${id}`)
 .then(response => response.json())
@@ -8,6 +11,7 @@ fetch(`http://localhost:3000/api/products/${id}`)
 
 function handleData(couch) {
     const { altTxt, colors, description, imageUrl, name, price, _id} = couch
+    productPrice = price
     makeImage(imageUrl, altTxt)
     makeTitle(name)
     makePrice(price)
@@ -47,3 +51,17 @@ function makeColors(colors) {
         select.appendChild(option)
     })
 }
+
+const button = document.querySelector("#addToCart")
+    button.addEventListener("click", (e) => {
+    const color = document.querySelector("#colors").value
+    const quantity = document.querySelector("#quantity").value
+    if (color == null || color === "" || quantity == null || quantity === "") alert("Veuillez choisir une couleur et un nombre d'articles")
+    const data = {
+        id: id,
+        color: color,
+        quantity: Number(quantity),
+        price: productPrice
+    }
+    localStorage.setItem(id, JSON.stringify(data))
+})
