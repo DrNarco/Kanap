@@ -1,12 +1,16 @@
 fetch("http://localhost:3000/api/products") 
-.then((response) => response.json()) .then((result) => { return addProducts(result) })
+.then((response) => response.json()) 
+.then((result) => addProducts(result))
 
-function addProducts(result) {
-    const id = result[0]._id
-    const imageUrl = result[0].imageUrl
-    const altTxt = result[0].altTxt
-    const name = result[0].name
-    const description = result[0].description
+function addProducts(couches) {
+    couches.forEach((couch) => {
+    ("couch: ", couch)
+
+    const id = couch._id
+    const imageUrl = couch.imageUrl
+    const altTxt = couch.altTxt
+    const name = couch.name
+    const description = couch.description
 
     const link = manageLink(id)
 
@@ -19,6 +23,7 @@ function addProducts(result) {
     article.appendChild(h3)
     article.appendChild(p)
     childAppend(link, article)
+    })
 }
 
 function manageLink(id) {
