@@ -3,6 +3,7 @@ const urlParams = new URLSearchParams(search)
 const id = urlParams.get("id")
 if (id != null) {
     let productPrice = 0
+    let imgUrl, altText
 }
 
 fetch(`http://localhost:3000/api/products/${id}`)
@@ -12,6 +13,8 @@ fetch(`http://localhost:3000/api/products/${id}`)
 function handleData(couch) {
     const { altTxt, colors, description, imageUrl, name, price, _id} = couch
     productPrice = price
+     imgUrl = imageUrl
+     altText = altTxt
     makeImage(imageUrl, altTxt)
     makeTitle(name)
     makePrice(price)
@@ -53,15 +56,35 @@ function makeColors(colors) {
 }
 
 const button = document.querySelector("#addToCart")
-    button.addEventListener("click", (e) => {
+    button.addEventListener("click", handleClick)
+
+
+function handleClick() {
     const color = document.querySelector("#colors").value
     const quantity = document.querySelector("#quantity").value
-    if (color == null || color === "" || quantity == null || quantity === "") alert("Veuillez choisir une couleur et un nombre d'articles")
+    if (failedOrderValidation(color, quantity)) return
+    saveCart(color, quantity)
+    redirectToCart()
+}
+
+function saveCart(color, quantity) {
     const data = {
         id: id,
         color: color,
         quantity: Number(quantity),
-        price: productPrice
+        price: productPrice,
+        imageUrl: imgUrl,
+        altTxt: altText
     }
     localStorage.setItem(id, JSON.stringify(data))
-})
+}
+
+function failedOrderValidation(color, quantity) {
+    if (color == null || color === "" || quantity == null || quantity == 0) { alert("Veuillez choisir une couleur et un nombre d'articles") 
+    return true
+}
+}
+
+function redirectToCart() {
+    window.location.href = "cart.html"
+}
