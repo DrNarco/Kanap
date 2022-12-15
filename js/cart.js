@@ -1,7 +1,7 @@
 const cart = []
 
 allocateCacheItems()
-cart.forEach((item) => displayItem(item))
+cart.forEach((item) => showItem(item))
 
 function allocateCacheItems() {
     const numberOfItems = localStorage.length
@@ -12,35 +12,47 @@ function allocateCacheItems() {
     }
 }
 
-function displayItem(item) {
+function showItem(item) {
     const article = makeArticle(item)
     displayArticle(article)
     const imageDiv = makeImageDiv(item)
     article.appendChild(imageDiv)
-    const cartItemContent = makeCartContent(imageDiv, item)
+    const cartItemContent = doCartContent(imageDiv, item)
     article.appendChild(cartItemContent)
     displayArticle(article)
-    displayTotalQuantity(item)
+    showItemQuantity()
+    showTotalPrice()
 }
 
-function displayTotalQuantity(item) {
-    const totalQuantity = document.querySelector("#totalQuantity")
-    totalQuantity.textContent = item.quantity  
+function showItemQuantity() {
+    const displayTotalQuantity = document.querySelector("#totalQuantity")
+    const total = cart.reduce((total, item) => total + item.quantity, 0)
+    displayTotalQuantity.textContent = total
 }
 
-function makeCartContent(div, item) {
+function showTotalPrice() {
+    let total = 0
+    const totalPrice = document.querySelector("#totalPrice")
+    cart.forEach(item => {
+        const totalUnitPrice = item.price * item.quantity
+        total += totalUnitPrice
+    })
+    totalPrice.textContent = total
+}
+
+function doCartContent(div, item) {
     const cartItemContent = document.createElement("div")
     cartItemContent.classList.add("cart__item__content")
 
     const description = makeDescription(div, item)
-    const settings = makeSettings(item)
+    const settings = doSettings(item)
 
     cartItemContent.appendChild(description)
     cartItemContent.appendChild(settings)
     return cartItemContent
 }
 
-function makeSettings(item) {
+function doSettings(item) {
     const settings = document.createElement("div")
     settings.classList.add("cart__item__content__settings")
 
@@ -71,8 +83,24 @@ function addQuantityToSettings(settings, item) {
     input.min = "1"
     input.max = "100"
     input.value = item.quantity
+    input.addEventListener("input", () => updatePriceAndQuantity(item.id, input.value, item))
     quantity.appendChild(input)
     settings.appendChild(quantity)
+}
+
+function updatePriceAndQuantity(id, newValue, item) {
+    const itemToUpdate = cart.find(item => item.id === id)
+    itemToUpdate.quantity = Number(newValue)
+    item.quantity = itemToUpdate.quantity
+    showItemQuantity()
+    showTotalPrice()
+    updateCacheData(item)
+}
+
+function updateCacheData(item) {
+    const dataToSave = JSON.stringify(item)
+    const key = `${item.id}-${item.color}`
+    localStorage.setItem(key, dataToSave)
 }
 
 function makeDescription(div, item) {
