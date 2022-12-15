@@ -3,6 +3,9 @@ const cart = []
 allocateCacheItems()
 cart.forEach((item) => showItem(item))
 
+const orderButton = document.querySelector("#order")
+orderButton.addEventListener("click", (e) => fillForm(e))
+
 function allocateCacheItems() {
     const numberOfItems = localStorage.length
     for(let i = 0; i < numberOfItems; i++) {
@@ -163,7 +166,77 @@ function makeImageDiv(item) {
     return div
 }
 
+function fillForm(e) {
+    e.preventDefault()
+    if (cart.length === 0) {
+        alert("Veuillez ajouter des produits à votre cart")
+        return
+    }
+    if (formInvalid()) return
+    if (emailInvalid()) return
+    const body = doRequestBody()
+    fetch("http://localhost:3000/api/products/order", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then((res) => res.json())
+    .then((data) => console.log(data))
+}
 
+function emailInvalid() {
+    const email = document.querySelector("#email").value
+    const regex = /^[A-Za-z0-9+_.-]+@(.+)$/
+        if (regex.test(email) === false) {
+            alert("Veuillez utiliser une addresse email valide")
+            return true
+        }
+        return false
+    }
 
+function formInvalid() {
+    const form = document.querySelector(".cart__order__form")
+    const inputs = form.querySelectorAll("input")
+    inputs.forEach((input) => {
+        if (input.value === "") {
+            alert("Merci de bien vouloir remplir tous les champs")
+            return true
+        }
+        return false
+    })
+}
+
+function doRequestBody() {
+    const form = document.querySelector(".cart__order__form")
+    const firstName = form.elements.firstName.value
+    const lastName = form.elements.lastName.value
+    const adress = form.elements.adress.value
+    const city = form.elements.city.value
+    const email = form.elements.email.value
+    const body = {
+        contact: {
+            firstName: firstName,
+            lastName: lastName,
+            adress: adress,
+            city: city,
+            email: email
+        },
+        products: retrieveCacheIds()
+    }
+    return body
+}
+
+function retrieveCacheIds() {
+    const numberOfItems = localStorage.length
+    const ids = []
+    for (let i = 0; i < numberOfItems; i++) {
+    const key = localStorage.key(i)
+    const id = key.split("-")[0]
+    ids.push(id)
+    }
+    return ids
+}
 
 
