@@ -4,7 +4,7 @@ allocateCacheItems()
 cart.forEach((item) => showItem(item))
 
 const orderButton = document.querySelector("#order")
-orderButton.addEventListener("click", (e) => fillForm(e))
+orderButton.addEventListener("click", (e) => formSubmition(e))
 
 function allocateCacheItems() {
     const numberOfItems = localStorage.length
@@ -166,7 +166,7 @@ function makeImageDiv(item) {
     return div
 }
 
-function fillForm(e) {
+function formSubmition(e) {
     e.preventDefault()
     if (cart.length === 0) {
         alert("Veuillez ajouter des produits à votre cart")
@@ -174,16 +174,21 @@ function fillForm(e) {
     }
     if (formInvalid()) return
     if (emailInvalid()) return
-    const body = doRequestBody()
+    const body = bodyRequest()
     fetch("http://localhost:3000/api/products/order", {
         method: "POST",
         body: JSON.stringify(body),
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
     })
     .then((res) => res.json())
-    .then((data) => console.log(data))
+    .then((data) => {
+        const orderId = data.orderId
+        window.location.href = "/html/confirmation.html" + "?orderId=" + orderId
+    })
+    .catch((err) => console.error(err))
+    
 }
 
 function emailInvalid() {
@@ -208,30 +213,30 @@ function formInvalid() {
     })
 }
 
-function doRequestBody() {
+function bodyRequest() {
     const form = document.querySelector(".cart__order__form")
     const firstName = form.elements.firstName.value
     const lastName = form.elements.lastName.value
-    const adress = form.elements.adress.value
+    const address = form.elements.address.value
     const city = form.elements.city.value
     const email = form.elements.email.value
     const body = {
         contact: {
             firstName: firstName,
             lastName: lastName,
-            adress: adress,
+            address: address,
             city: city,
             email: email
         },
-        products: retrieveCacheIds()
+        products: allocateCacheIds()
     }
     return body
 }
 
-function retrieveCacheIds() {
-    const numberOfItems = localStorage.length
+function allocateCacheIds() {
+    const numberOfProducts = localStorage.length
     const ids = []
-    for (let i = 0; i < numberOfItems; i++) {
+    for (let i = 0; i < numberOfProducts; i++) {
     const key = localStorage.key(i)
     const id = key.split("-")[0]
     ids.push(id)
