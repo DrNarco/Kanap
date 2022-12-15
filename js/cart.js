@@ -20,11 +20,11 @@ function showItem(item) {
     const cartItemContent = doCartContent(imageDiv, item)
     article.appendChild(cartItemContent)
     displayArticle(article)
-    showItemQuantity()
+    showTotalQuantity()
     showTotalPrice()
 }
 
-function showItemQuantity() {
+function showTotalQuantity() {
     const displayTotalQuantity = document.querySelector("#totalQuantity")
     const total = cart.reduce((total, item) => total + item.quantity, 0)
     displayTotalQuantity.textContent = total
@@ -57,17 +57,37 @@ function doSettings(item) {
     settings.classList.add("cart__item__content__settings")
 
     addQuantityToSettings(settings, item)
-    addDeleteToSettings(settings)
+    addDeleteToSettings(settings, item)
     return settings
 }
 
-function addDeleteToSettings(settings) {
+function addDeleteToSettings(settings, item) {
     const div = document.createElement("div")
     div.classList.add("cart__item__content__settings__delete")
+    div.addEventListener("click", () => deleteItem(item))
     const p = document.createElement("p")
     p.textContent = "Supprimer"
     div.appendChild(p)
     settings.appendChild(div)
+}
+
+function deleteItem(item) {
+    const itemToDelete = cart.find((product) => product.id === item.id && product.color === item.color)
+    cart.splice(itemToDelete, 1)
+    showTotalQuantity()
+    showTotalPrice()
+    deleteCacheData(item)
+    removeProductFromCart(item)
+}
+
+function removeProductFromCart(item) {
+    const productToDelete = document.querySelector(`article[data-id="${item.id}"][data-color="${item.color}"]`)
+    productToDelete.remove()
+}
+
+function deleteCacheData(item) {
+    const key = `${item.id}-${item.color}`
+    localStorage.removeItem(key)
 }
 
 function addQuantityToSettings(settings, item) {
@@ -92,7 +112,7 @@ function updatePriceAndQuantity(id, newValue, item) {
     const itemToUpdate = cart.find(item => item.id === id)
     itemToUpdate.quantity = Number(newValue)
     item.quantity = itemToUpdate.quantity
-    showItemQuantity()
+    showTotalQuantity()
     showTotalPrice()
     updateCacheData(item)
 }
